@@ -1,0 +1,122 @@
+2016-10-08T19:26:02.546876: step 29, loss 2.19111, acc 0.71875
+2016-10-08T19:26:57.604595: step 30, loss 1.11847, acc 0.734375
+Traceback (most recent call last):
+      File "train.py", line 187, in <module>
+          for batch in batches:
+        File "train.py", line 160, in train_step feed_dict)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py", line 372, in run run_metadata_ptr)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py", line 636, in _run feed_dict_string, options, run_metadata)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py", line 708, in _do_run target_list, options, run_metadata)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py", line 728, in _do_call raise type(e)(node_def, op, message)
+      tensorflow.python.framework.errors.InvalidArgumentError: indices[33,1179] = 11741 is not in [0, 11741)
+               [[Node: embedding/embedding_lookup = Gather[Tindices=DT_INT32, Tparams=DT_FLOAT, _class=["loc:@embedding/W"], validate_indices=true, _device="/job:localhost/replica:0/task:0/cpu:0"](embedding/W/read, _recv_input_x_0)]]
+      Caused by op u'embedding/embedding_lookup', defined at:
+        File "train.py", line 96, in <module>
+          l2_reg_lambda=FLAGS.l2_reg_lambda)
+        File "/mnt/disks/part2/work/pachira/cnn-text-classification-tf/text_cnn.py", line 27, in __init_  _ self.embedded_chars = tf.nn.embedding_lookup(W, self.input_x)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/embedding_ops.py", line 86, in embedding_lookup validate_indices=validate_indices)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/gen_array_ops.py", line 780, in gather validate_indices=validate_indices, name=name)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/ops/op_def_library.py", line 704, in apply_op op_def=op_def)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/framework/ops.py", line 2260, in create_op original_op=self._default_original_op, op_def=op_def)
+        File "/usr/local/lib/python2.7/dist-packages/tensorflow/python/framework/ops.py", line 1230, in __init__ self._traceback = _extract_stack()
+------------------- resolved due to dictionary I created did not include {"UNK":0} which is in the original model causing difference in vocabulary length ----------------------------
+
+
+------------- memory issue --------------------
+Evaluation:
+> /mnt/disks/part2/work/pachira/cnn-text-classification-tf/train.dev.py(183)dev_step()
+-> feed_dict = {
+(Pdb) next
+> /mnt/disks/part2/work/pachira/cnn-text-classification-tf/train.dev.py(184)dev_step()
+-> cnn.input_x: x_batch,
+(Pdb) l
+179                 """
+180                 Evaluates model on a dev set
+181                 """
+182                 pdb.set_trace()
+183                 feed_dict = {
+184  ->               cnn.input_x: x_batch,
+185                   cnn.input_y: y_batch,
+186                   cnn.dropout_keep_prob: 1.0
+187                 }
+188                 step, summaries, loss, accuracy = sess.run(
+189                     [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
+(Pdb) next
+> /mnt/disks/part2/work/pachira/cnn-text-classification-tf/train.dev.py(185)dev_step()
+-> cnn.input_y: y_batch,
+(Pdb) next
+> /mnt/disks/part2/work/pachira/cnn-text-classification-tf/train.dev.py(186)dev_step()
+-> cnn.dropout_keep_prob: 1.0
+(Pdb) next
+> /mnt/disks/part2/work/pachira/cnn-text-classification-tf/train.dev.py(188)dev_step()
+-> step, summaries, loss, accuracy = sess.run(
+(Pdb) l
+183                 feed_dict = {
+184                   cnn.input_x: x_batch,
+185                   cnn.input_y: y_batch,
+186                   cnn.dropout_keep_prob: 1.0
+187                 }
+188  ->             step, summaries, loss, accuracy = sess.run(
+189                     [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
+190                     feed_dict)
+191                 time_str = datetime.datetime.now().isoformat()
+192                 print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+193                 if writer:
+(Pdb) next
+> /mnt/disks/part2/work/pachira/cnn-text-classification-tf/train.dev.py(189)dev_step()
+-> [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
+(Pdb) step
+> /mnt/disks/part2/work/pachira/cnn-text-classification-tf/train.dev.py(190)dev_step()
+-> feed_dict)
+(Pdb) step
+--Call--
+> /usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py(287)run()
+-> def run(self, fetches, feed_dict=None, options=None, run_metadata=None):
+(Pdb) step
+> /usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py(363)run()
+-> run_metadata_ptr = tf_session.TF_NewBuffer()
+(Pdb) next
+> /usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py(364)run()
+-> if option:
+(Pdb) l
+359           TypeError: If `fetches` or `feed_dict` keys are of an inappropriate type.
+360           ValueError: If `fetches` or `feed_dict` keys are invalid or refer to a
+361             `Tensor` that doesn't exist.
+362         """
+363         run_metadata_ptr = tf_session.TF_NewBuffer()
+364  ->     if options:
+365           options_ptr = tf_session.TF_NewBufferFromString(
+366               compat.as_bytes(options.SerializeToString()))
+367         else:
+368           options_ptr = None
+369
+(Pdb) next
+> /usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py(368)run()
+-> options_ptr = None
+(Pdb) next
+> /usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py(370)run()
+-> try:
+(Pdb) next
+> /usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py(371)run()
+-> result = self._run(None, fetches, feed_dict, options_ptr,
+(Pdb) l
+366               compat.as_bytes(options.SerializeToString()))
+367         else:
+368           options_ptr = None
+369
+370         try:
+371  ->       result = self._run(None, fetches, feed_dict, options_ptr,
+372                              run_metadata_ptr)
+373           if run_metadata:
+374             proto_data = tf_session.TF_GetBuffer(run_metadata_ptr)
+375             run_metadata.ParseFromString(compat.as_bytes(proto_data))
+376         finally:
+(Pdb) step
+> /usr/local/lib/python2.7/dist-packages/tensorflow/python/client/session.py(372)run()
+-> run_metadata_ptr)
+(Pdb) next
+terminate called after throwing an instance of 'std::bad_alloc'
+what():  std::bad_alloc
+terminate called recursively
+Aborted
+
